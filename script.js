@@ -1,0 +1,39 @@
+var canvas = document.getElementById("canvi");
+var ctx = canvas.getContext("2d");
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+var mouseX = 0;
+var mouseY = 0;
+var dragged = false;
+var clicked = false
+var keys = [];
+function keysPressed(e) {
+  keys[e.keyCode] = true;
+  e.preventDefault();
+}
+function keysReleased(e) {
+  keys[e.keyCode] = false;
+}
+ctx.textAlign = "center";
+
+canvas.addEventListener("mousemove", function(e) {
+    var cRect = canvas.getBoundingClientRect();
+    mouseX = Math.round(e.clientX - cRect.left);
+    mouseY = Math.round(e.clientY - cRect.top);
+});
+canvas.addEventListener("mousedown", function(e) {
+    dragged = true;
+}, false);
+canvas.addEventListener("mouseup", function(e) {
+    if(dragged === true) {
+        clicked = true;
+        dragged = false;
+    }
+}, false);
+window.addEventListener("keydown", keysPressed, false);
+window.addEventListener("keyup", keysReleased, false);
+
+
+var update = setInterval(function() {
+  ctx.fillRect(0, 0, canvas.width * Math.random(), canvas.height)
+}, 20);
