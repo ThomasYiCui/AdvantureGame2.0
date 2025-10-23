@@ -65,4 +65,5 @@ var update = setInterval(function() {
     ctx.fillStyle = "rgb(0, 0, 0)";
     ctx.fillRect(0, 0, canvas.width, canvas.height)
     player.draw();
+    player.update();
 }, 20);
