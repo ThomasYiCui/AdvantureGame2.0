@@ -65,9 +65,25 @@ Player.prototype.update = function() {
     }
 }
 
-function Enemy() {
-    this.x = 0;
-    this.y = 0;
+function Enemy(x, y, type) {
+    this.x = x;
+    this.y = y;
+    this.type = type;
+    this.size = 30;
+    switch(this.type) {
+        case "1":
+            this.size = 30;
+        break;
+    }
+}
+Enemy.prototype.draw = function() {
+    ctx.fillStyle = "rgb(255, 0, 0)";
+    ctx.beginPath();
+    ctx.ellipse(this.x + this.size/2, this.y + this.size/2, this.size, this.size, 0, 0, 2 * Math.PI);
+    ctx.fill();
+}
+Enemy.prototype.update = function() {
+    
 }
 
 var player = new Player();
