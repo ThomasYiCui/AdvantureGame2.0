@@ -34,18 +34,25 @@ window.addEventListener("keydown", keysPressed, false);
 window.addEventListener("keyup", keysReleased, false);
 
 function Player() {
-    this.x = 0;
-    this.y = 0;
+    this.x = 100;
+    this.y = 100;
     this.lvl = 0;
     this.exp = 0;
-    this.size = 30;
+    this.size = 20;
     this.spd = 3;
+    this.r = 0;
 }
 Player.prototype.draw = function() {
-    ctx.fillStyle = "rgb(255, 0, 0)";
-    ctx.fillRect(this.x, this.y, this.size, this.size);
+    ctx.fillStyle = "rgb(252, 219, 154)";
+    ctx.beginPath();
+    ctx.ellipse(this.x + this.size/2, this.y + this.size/2, this.size, this.size, 0, 0, 2 * Math.PI);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.ellipse(this.x + this.size/2 - Math.cos(this.r) * 30, this.y + this.size/2  - Math.sin(this.r) * 30, this.size/3, this.size/3, 0, 0, 2 * Math.PI);
+    ctx.fill();
 }
 Player.prototype.update = function() {
+    this.r = Math.atan2(this.y - mouseY, this.x - mouseX)
     if(keys[87] || keys[38]) {
         this.y-=this.spd;
     } else if(keys[83] || keys[40]) {
@@ -56,6 +63,11 @@ Player.prototype.update = function() {
     } else if(keys[68] || keys[39]) {
         this.x+=this.spd;
     }
+}
+
+function Enemy() {
+    this.x = 0;
+    this.y = 0;
 }
 
 var player = new Player();
