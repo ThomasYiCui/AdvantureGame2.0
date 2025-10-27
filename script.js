@@ -1,20 +1,3 @@
-function hitboxGroup(hitboxes, func) {
-    this.hitboxes = hitboxes;
-    this.func = func;
-};
-hitboxGroup.prototype.check = function(p1, p2, padding) {
-    return Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2)) <= (p1.s/2 + p2.s/2) * 2 + padding;
-};
-hitboxGroup.prototype.draw = function() {
-    for(let i in this.hitboxes) {
-        let hitbox = this.hitboxes[i]
-        ctx.fillStyle = "rgb(255, 0, 0, 0.3)"
-        ctx.fill();
-        ctx.beginPath();
-        ctx.ellipse(hitbox.x, hitbox.y, hitbox.s, hitbox.s, 0, 0, 2 * Math.PI);
-        ctx.fill();
-    }
-}
 function button(x, y, w, h, func, opt) {
     if(mouseX > x && mouseY > y && mouseX < x + w && mouseY < y + h) {
         ctx.fillStyle = opt.hoverColor;
@@ -35,17 +18,6 @@ function button(x, y, w, h, func, opt) {
     ctx.textAlign = "center";
     ctx.font = opt.txtSize + "px Arial"
     ctx.fillText(opt.txt, x + w/2 - canvas.width/2, y + h/2 + opt.yOffset - canvas.height/2);
-}
-hitboxGroup.prototype.checkCollision = function(hitboxGroup, options) {
-    hitboxes = hitboxGroup.hitboxes;
-    var padding = options.padding || 0;
-    for(let i in hitboxes) {
-        for(let j in this.hitboxes) {
-            if(this.check(hitboxes[i], this.hitboxes[j], padding)) {
-                this.func(this.hitboxes[j], hitboxes[i])
-            }
-        }
-    }
 }
 
 function Player() {
