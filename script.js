@@ -164,7 +164,7 @@ var update = setInterval(function() {
             }
             ctx.translate(-cam.x, -cam.y)
             button(canvas.width/2 - 55, canvas.height/2 - 20, 110, 40, function() {
-                if(player.sp >= 1 && !player.ugprades["enchance"]) {
+                if(player.sp >= 1 && !player.upgrades["enchance"]) {
                     player.sp-=1;
                     player.upgrades["enchance"] = player.upgrades["enchance"] + 1 || 1;
                 }
