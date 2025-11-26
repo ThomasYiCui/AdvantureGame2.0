@@ -396,7 +396,7 @@ function spawnEnemy() {
         enemies.push(new Enemy(-2500 + 500 * Math.random(), -400 + 800 * Math.random(), "Goblin", "G" + i + "frame" + frameCount))
     }
     for(let i = 0; i < 10 - enemyNum["Slime"]; i++) {
-        enemies.push(new Enemy(0 - 500 * Math.random(), -400 + 800 * Math.random(), "Slime", "S" + i + "frame" + frameCount))
+        enemies.push(new Enemy(2500 - 500 * Math.random(), -400 + 800 * Math.random(), "Slime", "S" + i + "frame" + frameCount))
     }
 }
 function descWeapon(weaponName, cost, desc) {
@@ -414,4 +414,5 @@ function buyWeapon(weaponName, cost) {
         player.equipped = weaponName;
         player.owned.push(weaponName);
     }
+
 }
