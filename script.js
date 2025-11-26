@@ -1,5 +1,6 @@
 player = new Player();
 enemies = [];
+events = [];
 hitboxGroups = {
     "Walls": new hitboxGroup({}, function(h1, h2) {
         let dX = (h1.refer.x + h1.refer.w/2 - h2.refer.x)/h1.refer.w;
@@ -75,6 +76,25 @@ walls.push(new Wall(-325, -350, 250, 250, "wall", {color: "rgb(158, 105, 44)", i
 walls.push(new Wall(50, -350, 250, 250, "wall", {color: "rgb(158, 105, 44)", id: "ShopTopRight"}));
 walls.push(new Wall(-325, 250, 250, 250, "wall", {color: "rgb(158, 105, 44)", id: "ShopBottomLeft"}));
 walls.push(new Wall(50, 250, 250, 250, "wall", {color: "rgb(158, 105, 44)", id: "ShopBottomRight"}));
+
+events.push(new Event(-275, -100, 150, 50, function() {
+
+    if(keys[32]) {
+        scene = "shop"
+        shopCam = {
+            x: 0,
+            y: 0,
+        }
+        ctx.translate(player.x, player.y)
+        ctx.translate(-shopCam.x, -shopCam.y)
+    }
+}, {
+    triggers: {
+        type: "playerProximity",
+    }
+}))
+
+
 for(let i = 0; i < Math.round(canvas.width * canvas.height)/8000; i++) {
     props.push(new prop(-100 - canvas.width/2 + (canvas.width + 200) * Math.random(), -100 - canvas.height/2 + (canvas.width + 200) * Math.random(), "grass"));
 }
@@ -124,7 +144,9 @@ var update = setInterval(function() {
                 hitboxGroups["Sword"].draw();
                 hitboxGroups["Player"].draw();
             }
-            
+            for(var i = 0; i < events.length; i++) {
+                events[i].run();
+            }
             hitboxGroups["Sword"].checkCollision(hitboxGroups["Enemies"], {})
             hitboxGroups["Sword"].checkCollision(hitboxGroups["Player"], {})
             hitboxGroups["Projectiles"].checkCollision(hitboxGroups["Enemies"], {})
@@ -170,6 +192,7 @@ var update = setInterval(function() {
             ctx.textAlign = "left"
             ctx.fillStyle = "rgb(0, 0, 0)"
             ctx.fillText("Level: " + player.lvl, -canvas.width/2 + 15, canvas.height/2 - 118.5);
+            ctx.fillText("Gems: " + Math.round(player.displayGems), -canvas.width/2 + 10, -canvas.height/2 + 17);
             ctx.textAlign = "right";
             ctx.fillText("SP: " + player.sp, -canvas.width/2 + 160, canvas.height/2 - 118.5);
             //x, y, w, h, func, opt: {hoverColor, color, txtColor, txtSize, txt, args, yOffset}
@@ -179,6 +202,47 @@ var update = setInterval(function() {
                 ctx.translate(-cam.x, -cam.y)
             }, {hoverColor: "rgb(100, 100, 100)", color: "rgb(150, 150, 150)", txtColor: "rgb(0, 0, 0)", txtSize: 15, txt: "Upgrade", args: undefined, yOffset: 5})
             ctx.translate(-player.x, -player.y)
+        break;
+        case "shop":
+            ctx.translate(shopCam.x, shopCam.y)
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = "rgb(33, 33, 33)";
+            ctx.fillRect(-canvas.width/2, -canvas.height/2, canvas.width * 2, canvas.height * 2)
+            if(keys[87] || keys[38]) {
+                //shopCam.y-=5;
+            } else if((keys[83] || keys[40]) && shopCam.y + 5 <= 0) {
+                //shopCam.y+=5;
+            }
+            ctx.translate(-shopCam.x, -shopCam.y)
+
+            ctx.textAlign = "center"
+            ctx.font = "40px Arial"
+            ctx.fillStyle = "rgba(255, 255, 255, 1)"
+            ctx.fillText("Blacksmith", 0, -canvas.height/2 + 35);
+
+            button(10, 70, (canvas.width - 30)/2, 60, descWeapon, {hoverColor: "rgb(100, 100, 100)", color: "rgb(150, 150, 150)", txtColor: "rgb(0, 0, 0)", txtSize: 15, txt: "Basic Sword", cost: 0, swapEquip: true, args: undefined, yOffset: 5, desc: "A basic sword"})
+            button(10, 140, (canvas.width - 30)/2, 60, descWeapon, 
+                {hoverColor: "rgb(100, 100, 100)", color: "rgb(150, 150, 150)", txtColor: "rgb(0, 0, 0)", txtSize: 15, txt: "Spear", cost: 2000, swapEquip: true, args: undefined, yOffset: 5, desc: "A long ranged piercing weapon"})
+            button(10, 210, (canvas.width - 30)/2, 60, descWeapon, {hoverColor: "rgb(100, 100, 100)", color: "rgb(150, 150, 150)", txtColor: "rgb(0, 0, 0)", txtSize: 15, txt: "Great Sword", cost: 2000, swapEquip: true, args: undefined, yOffset: 5, desc: "A bulky long but slower sword"})
+            button(10, 280, (canvas.width - 30)/2, 60, descWeapon, {hoverColor: "rgb(100, 100, 100)", color: "rgb(150, 150, 150)", txtColor: "rgb(0, 0, 0)", txtSize: 15, txt: "Katana", cost: 2000, swapEquip: true, args: undefined, yOffset: 5, desc: "A quick fast sword perfect for parrying"})
+            button(10, 350, (canvas.width - 30)/2, 60, descWeapon, {hoverColor: "rgb(100, 100, 100)", color: "rgb(150, 150, 150)", txtColor: "rgb(0, 0, 0)", txtSize: 15, txt: "Mace", cost: 2000, swapEquip: true, args: undefined, yOffset: 5, desc: "A great big heavy mace for staggering"})
+
+            if(sceneOpt.desc) {
+                ctx.fillStyle = "rgba(255, 255, 255, 1)";
+                ctx.font = "15px Arial"
+                ctx.textAlign = "left"
+                wrappedText(sceneOpt.desc, 20, canvas.height/2 - 100, canvas.width/2, 20)
+                button(10 + canvas.width/2, canvas.height - 70, (canvas.width - 30)/2, 60, buyWeapon, {hoverColor: "rgb(100, 100, 100)", color: "rgb(150, 150, 150)", txtColor: "rgb(0, 0, 0)", txtSize: 15, txt: "Buy", weapon: sceneOpt.name, cost: sceneOpt.cost, swapEquip: true, args: undefined, yOffset: 5})
+                drawWeapon(0, 100, Math.PI * 0.75, 50, sceneOpt.name)
+            }
+
+            ctx.translate(shopCam.x, shopCam.y)
+            button(10, 10, 40, 25, function() {
+                scene = "game"
+                ctx.translate(shopCam.x, shopCam.y)
+                ctx.translate(-player.x, -player.y)
+            }, {hoverColor: "rgb(100, 100, 100)", color: "rgb(150, 150, 150)", txtColor: "rgb(0, 0, 0)", txtSize: 15, txt: "Exit", args: undefined, yOffset: 5})
+            ctx.translate(-shopCam.x, -shopCam.y)
         break;
         case "upgrade":
             ctx.translate(cam.x, cam.y)
@@ -196,7 +260,6 @@ var update = setInterval(function() {
                 cam.x+=5;
             }
             ctx.translate(-cam.x, -cam.y)
-            
             
             ctx.fillStyle = "rgb(201, 201, 201)"
             // hand

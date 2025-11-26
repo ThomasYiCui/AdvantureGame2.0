@@ -24,3 +24,24 @@ Wall.prototype.draw = function() {
         break;
     }
 };
+
+
+function Event(x, y, w, h, func, opt) {
+     this.x = x;
+     this.y = y;
+     this.w = w;
+     this.h = h;
+     this.func = func;
+     this.opt = opt;
+}
+Event.prototype.run = function() {
+    switch(this.opt.triggers.type) {
+        case "playerProximity":
+            ctx.fillStyle = "rgb(255, 0, 0, 0.3)"
+            ctx.fillRect(this.x, this.y, this.w, this.h);
+            if(player.x - player.size < this.x + this.w && player.x + player.size > this.x && player.y - player.size < this.y + this.h && player.y + player.size > this.y) {
+                this.func();
+            }
+        break;
+    }
+};

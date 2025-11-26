@@ -24,6 +24,9 @@ function Player() {
     this.spd = 2;
     this.mana = 5;
     this.maxMana = 5;
+    this.gems = 5000;
+    this.displayGems = this.gems;
+    this.owned = ["Basic Sword"]
     this.exp = 0;
     //this.exp = 0;
     this.nxtLvlExp = 10;
@@ -90,7 +93,20 @@ Player.prototype.update = function() {
     }
     this.swings = this.swings.slice(0, 4)
     var pr = this.r
-    this.r = Math.atan2(canvas.height/2 - mouseY, canvas.width/2 - mouseX)
+    this.displayGems+=(this.gems - this.displayGems) * 0.1
+    var targetR = Math.atan2(canvas.height/2 - mouseY, canvas.width/2 - mouseX);
+    if(this.r > Math.PI) {
+        this.r = -Math.PI
+    } else if(this.r < -Math.PI) {
+        this.r = Math.PI;
+    }
+    if(Math.min(Math.abs(targetR - this.r), Math.abs(targetR - this.r + Math.PI * 2), Math.abs(targetR - this.r - Math.PI * 2)) < weaponStats[this.equipped].spd/20) {
+        this.r = targetR;
+    } else if(targetR - this.r < 0 && targetR - this.r > -Math.PI || targetR > 0 && this.r < 0 && Math.abs(targetR) + Math.abs(this.r) > Math.PI) {
+        this.r-=weaponStats[this.equipped].spd/20;
+    } else {
+        this.r+=weaponStats[this.equipped].spd/20;
+    }
     this.swings.push(Math.min(Math.abs(pr - this.r), Math.abs(pr + 360 - this.r)));
     this.swing = 0;
     for(let i = 0; i < this.swings.length; i++) {
@@ -166,6 +182,11 @@ Player.prototype.update = function() {
             type: "ally",
         },
     }
+    let index = 1;
+    while(hitboxGroups["Sword"].hitboxes["p" + index]) {
+        hitboxGroups["Sword"].hitboxes["p" + index] = undefined;
+        index+=1;
+    }
     switch(this.equipped) {
         case "Basic Sword":
             hitboxGroups["Sword"].hitboxes["p1"] = {
@@ -206,40 +227,157 @@ Player.prototype.update = function() {
             this.equippedIndex = Math.max(this.y - Math.sin(this.r) * (1.5 * this.size) + 15, this.y - Math.sin(this.r) * (6 * this.size) + 15)
             render.push({item: this, index: this.equippedIndex})
         break;
+        case "Great Sword":
+            hitboxGroups["Sword"].hitboxes["p1"] = {
+                x: this.x - Math.cos(this.r) * this.size * 2, 
+                y: this.y  - Math.sin(this.r) * this.size * 2, 
+                s: this.size/3,
+                refer: this,
+                type: "ally",
+            };
+            hitboxGroups["Sword"].hitboxes["p2"] = {
+                x: this.x - Math.cos(this.r) * this.size * 19/6, 
+                y: this.y  - Math.sin(this.r) * this.size * 19/6, 
+                s: this.size * 0.75,
+                refer: this,
+                type: "ally",
+            };
+            hitboxGroups["Sword"].hitboxes["p3"] = {
+                x: this.x - Math.cos(this.r) * this.size * 28/6, 
+                y: this.y  - Math.sin(this.r) * this.size * 28/6, 
+                s: this.size * 0.75,
+                refer: this,
+                type: "ally",
+            };
+            hitboxGroups["Sword"].hitboxes["p4"] = {
+                x: this.x - Math.cos(this.r) * this.size * 37/6, 
+                y: this.y  - Math.sin(this.r) * this.size * 37/6, 
+                s: this.size * 0.75,
+                refer: this,
+                type: "ally",
+            };
+            hitboxGroups["Sword"].hitboxes["p5"] = {
+                x: this.x - Math.cos(this.r) * this.size * 46/6, 
+                y: this.y  - Math.sin(this.r) * this.size * 46/6, 
+                s: this.size * 0.75,
+                refer: this,
+                type: "ally",
+            };
+            hitboxGroups["Sword"].hitboxes["p6"] = {
+                x: this.x - Math.cos(this.r) * this.size * 53/6, 
+                y: this.y  - Math.sin(this.r) * this.size * 53/6, 
+                s: this.size * 0.5,
+                refer: this,
+                type: "ally",
+            };
+            this.equippedIndex = Math.max(this.y - Math.sin(this.r) * (1.5 * this.size) + 15, this.y - Math.sin(this.r) * (6 * this.size) + 15)
+            render.push({item: this, index: this.equippedIndex})
+        break;
+        case "Katana":
+            hitboxGroups["Sword"].hitboxes["p1"] = {
+                x: this.x - Math.cos(this.r) * this.size * 6/3, 
+                y: this.y  - Math.sin(this.r) * this.size * 6/3, 
+                s: this.size/3,
+                refer: this,
+                type: "ally",
+            };
+            hitboxGroups["Sword"].hitboxes["p2"] = {
+                x: this.x - Math.cos(this.r) * this.size * 8/3, 
+                y: this.y  - Math.sin(this.r) * this.size * 8/3, 
+                s: this.size/4,
+                refer: this,
+                type: "ally",
+            };
+            hitboxGroups["Sword"].hitboxes["p3"] = {
+                x: this.x - Math.cos(this.r) * this.size * 19/6, 
+                y: this.y  - Math.sin(this.r) * this.size * 19/6, 
+                s: this.size/4,
+                refer: this,
+                type: "ally",
+            };
+            hitboxGroups["Sword"].hitboxes["p4"] = {
+                x: this.x - Math.cos(this.r) * this.size * 22/6, 
+                y: this.y  - Math.sin(this.r) * this.size * 22/6, 
+                s: this.size/4,
+                refer: this,
+                type: "ally",
+            };
+            hitboxGroups["Sword"].hitboxes["p5"] = {
+                x: this.x - Math.cos(this.r) * this.size * 25/6, 
+                y: this.y  - Math.sin(this.r) * this.size * 25/6, 
+                s: this.size/4,
+                refer: this,
+                type: "ally",
+            };
+            hitboxGroups["Sword"].hitboxes["p6"] = {
+                x: this.x - Math.cos(this.r) * this.size * 28/6, 
+                y: this.y  - Math.sin(this.r) * this.size * 28/6, 
+                s: this.size/4,
+                refer: this,
+                type: "ally",
+            };
+            hitboxGroups["Sword"].hitboxes["p7"] = {
+                x: this.x - Math.cos(this.r) * this.size * 31/6, 
+                y: this.y  - Math.sin(this.r) * this.size * 31/6, 
+                s: this.size/4,
+                refer: this,
+                type: "ally",
+            };
+            hitboxGroups["Sword"].hitboxes["p8"] = {
+                x: this.x - Math.cos(this.r) * this.size * 34/6, 
+                y: this.y  - Math.sin(this.r) * this.size * 34/6, 
+                s: this.size/4,
+                refer: this,
+                type: "ally",
+            };
+            hitboxGroups["Sword"].hitboxes["p9"] = {
+                x: this.x - Math.cos(this.r) * this.size * 37/6, 
+                y: this.y  - Math.sin(this.r) * this.size * 37/6, 
+                s: this.size/4,
+                refer: this,
+                type: "ally",
+            };
+            hitboxGroups["Sword"].hitboxes["p10"] = {
+                x: this.x - Math.cos(this.r) * this.size * 40/6, 
+                y: this.y  - Math.sin(this.r) * this.size * 40/6, 
+                s: this.size/4,
+                refer: this,
+                type: "ally",
+            };
+            hitboxGroups["Sword"].hitboxes["p11"] = {
+                x: this.x - Math.cos(this.r) * this.size * 43/6, 
+                y: this.y  - Math.sin(this.r) * this.size * 43/6, 
+                s: this.size/4,
+                refer: this,
+                type: "ally",
+            };
+            this.equippedIndex = Math.max(this.y - Math.sin(this.r) * (1.5 * this.size) + 15, this.y - Math.sin(this.r) * (8 * this.size) + 15)
+            render.push({item: this, index: this.equippedIndex})
+        break;
+        case "Mace":
+            hitboxGroups["Sword"].hitboxes["p1"] = {
+                x: this.x - Math.cos(this.r) * this.size * 15/3, 
+                y: this.y  - Math.sin(this.r) * this.size * 15/3, 
+                s: this.size,
+                refer: this,
+                type: "ally",
+            };
+            this.equippedIndex = Math.max(this.y - Math.sin(this.r) * (1.5 * this.size) + 15, this.y - Math.sin(this.r) * (15/3 * this.size) + 15)
+            render.push({item: this, index: this.equippedIndex})
+        break;
+        case "Spear":
+            hitboxGroups["Sword"].hitboxes["p1"] = {
+                x: this.x - Math.cos(this.r) * this.size * 6.2, 
+                y: this.y  - Math.sin(this.r) * this.size * 6.2, 
+                s: this.size * 0.4,
+                refer: this,
+                type: "ally",
+            };
+            this.equippedIndex = Math.max(this.y - Math.sin(this.r) * (1.5 * this.size) + 15, this.y - Math.sin(this.r) * (15/3 * this.size) + 15)
+            render.push({item: this, index: this.equippedIndex})
+        break;
     }
 }
 Player.prototype.drawEquipped = function() {
-    switch(this.equipped) {
-        case "Basic Sword":
-            ctx.fillStyle = "rgb(252, 219, 154)";
-            ctx.beginPath();
-            ctx.ellipse(this.x - Math.cos(this.r) * 40, this.y  - Math.sin(this.r) * 40, this.size/3, this.size/3, 0, 0, 2 * Math.PI);
-            ctx.fill();
-            ctx.lineWidth = this.size/3;
-            ctx.strokeStyle = "rgb(171, 86, 0)"
-            ctx.beginPath(); 
-            ctx.moveTo(this.x - Math.cos(this.r) * (this.size * 1.5), this.y - Math.sin(this.r) * (this.size * 1.5)); 
-            ctx.lineTo(this.x - Math.cos(this.r) * (this.size * 2.5), this.y - Math.sin(this.r) * (this.size * 2.5)); 
-            ctx.stroke();
-            ctx.lineWidth = this.size * 0.75;
-            ctx.beginPath(); 
-            ctx.moveTo(this.x - Math.cos(this.r) * (this.size * 2.5), this.y - Math.sin(this.r) * (this.size * 2.5)); 
-            ctx.lineTo(this.x - Math.cos(this.r) * (this.size * 2.8), this.y - Math.sin(this.r) * (this.size * 2.8)); 
-            ctx.stroke(); 
-            ctx.strokeStyle = "rgb(209, 209, 209)"
-            ctx.lineWidth = this.size * 0.6;
-            ctx.beginPath(); 
-            ctx.moveTo(this.x - Math.cos(this.r) * (6.02 * this.size), this.y - Math.sin(this.r) * (6.02 * this.size)); 
-            ctx.lineTo(this.x - Math.cos(this.r) * (2.8 * this.size), this.y - Math.sin(this.r) * (2.8 * this.size)); 
-            ctx.stroke();
-            
-            // tip
-            ctx.fillStyle = "rgb(209, 209, 209)"
-            ctx.beginPath();
-            ctx.moveTo(this.x - Math.cos(this.r) * 6 * this.size - Math.cos(this.r + Math.PI/2) * this.size * 0.3, this.y - Math.sin(this.r) * 6 * this.size - Math.sin(this.r + Math.PI/2) * this.size * 0.3);
-            ctx.lineTo(this.x - Math.cos(this.r) * this.size * 6.6, this.y - Math.sin(this.r) * this.size * 6.6);
-            ctx.lineTo(this.x - Math.cos(this.r) * 6 * this.size + Math.cos(this.r + Math.PI/2) * this.size * 0.3, this.y - Math.sin(this.r) * 6 * this.size + Math.sin(this.r + Math.PI/2) * this.size * 0.3);
-            ctx.fill();
-        break
-    }
+    drawWeapon(this.x, this.y, this.r, this.size, this.equipped)
 }

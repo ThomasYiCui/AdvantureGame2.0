@@ -16,11 +16,13 @@ hitboxGroup.prototype.check = function(p1, p2, padding) {
 hitboxGroup.prototype.draw = function() {
     for(let i in this.hitboxes) {
         let hitbox = this.hitboxes[i]
-        ctx.fillStyle = "rgb(255, 0, 0, 0.3)"
-        ctx.fill();
-        ctx.beginPath();
-        ctx.ellipse(hitbox.x, hitbox.y, hitbox.s, hitbox.s, 0, 0, 2 * Math.PI);
-        ctx.fill();
+        if(hitbox) {
+            ctx.fillStyle = "rgb(255, 0, 0, 0.3)"
+            ctx.fill();
+            ctx.beginPath();
+            ctx.ellipse(hitbox.x, hitbox.y, hitbox.s, hitbox.s, 0, 0, 2 * Math.PI);
+            ctx.fill();
+        }
     }
 }
 hitboxGroup.prototype.checkCollision = function(hitboxGroup, options) {
@@ -28,6 +30,9 @@ hitboxGroup.prototype.checkCollision = function(hitboxGroup, options) {
     var padding = options.padding || 0;
     for(let i in hitboxes) {
         for(let j in this.hitboxes) {
+            if(!hitboxes[i] || !this.hitboxes[j]) {
+                continue;
+            }
             if(this.check(hitboxes[i], this.hitboxes[j], padding)) {
                 this.func(this.hitboxes[j], hitboxes[i])
             }

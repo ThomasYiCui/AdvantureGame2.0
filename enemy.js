@@ -26,6 +26,7 @@ function Enemy(x, y, type, id) {
             this.health = 18;
             this.maxHealth = 18;
             this.giveExp = 1.5;
+            this.giveGems = 9;
             this.spd = 1;
             this.strength = 0.5;
             this.strafing = false;
@@ -45,6 +46,7 @@ function Enemy(x, y, type, id) {
             this.armor = 1;
             this.knockBackRes = 20;
             this.giveExp = 1;
+            this.giveGems = 6;
             this.spd = 3;
             this.size = 13;
             this.dmg = 2;
@@ -220,47 +222,12 @@ Enemy.prototype.update = function() {
     }
 }
 Enemy.prototype.drawEquipped = function() {
-    switch(this.equipped) {
-        case "Basic Sword":
-            ctx.fillStyle = "rgb(219, 0, 0)"
-            // hand
-            ctx.beginPath();
-            ctx.ellipse(this.x - Math.cos(this.r) * 30, this.y  - Math.sin(this.r) * 30, this.size/3, this.size/3, 0, 0, 2 * Math.PI);
-            ctx.fill();
-            
-            // sword
-            ctx.lineWidth = 7;
-            ctx.strokeStyle = "rgb(171, 86, 0)"
-            ctx.beginPath(); 
-            ctx.moveTo(this.x - Math.cos(this.r) * (this.size * 1.3), this.y - Math.sin(this.r) * (this.size * 1.3)); 
-            ctx.lineTo(this.x - Math.cos(this.r) * (this.size * 2.5), this.y - Math.sin(this.r) * (this.size * 2.5)); 
-            ctx.stroke();
-            ctx.lineWidth = 20;
-            ctx.beginPath(); 
-            ctx.moveTo(this.x - Math.cos(this.r) * (this.size * 2.5), this.y - Math.sin(this.r) * (this.size * 2.5)); 
-            ctx.lineTo(this.x - Math.cos(this.r) * (this.size * 2.8), this.y - Math.sin(this.r) * (this.size * 2.8)); 
-            ctx.stroke(); 
-            ctx.strokeStyle = "rgb(209, 209, 209)"
-            ctx.lineWidth = 12;
-            ctx.beginPath(); 
-            ctx.moveTo(this.x - Math.cos(this.r) * (5.02 * this.size), this.y - Math.sin(this.r) * (5.02 * this.size)); 
-            ctx.lineTo(this.x - Math.cos(this.r) * (2.8 * this.size), this.y - Math.sin(this.r) * (2.8 * this.size)); 
-            ctx.stroke();
-            
-            
-            // tip
-            ctx.fillStyle = "rgb(209, 209, 209)"
-            ctx.beginPath();
-            ctx.moveTo(this.x - Math.cos(this.r) * 5 * this.size - Math.cos(this.r + Math.PI/2) * this.size * 0.3, this.y - Math.sin(this.r) * 5 * this.size - Math.sin(this.r + Math.PI/2) * this.size * 0.3);
-            ctx.lineTo(this.x - Math.cos(this.r) * this.size * 5.6, this.y - Math.sin(this.r) * this.size * 5.6);
-            ctx.lineTo(this.x - Math.cos(this.r) * 5 * this.size + Math.cos(this.r + Math.PI/2) * this.size * 0.3, this.y - Math.sin(this.r) * 5 * this.size + Math.sin(this.r + Math.PI/2) * this.size * 0.3);
-            ctx.fill();
-        break;
-    }
+    drawWeapon(this.x, this.y, this.r, this.size, this.equipped)
 }
 Enemy.prototype.die = function() {
     if(this.health <= 0) {
         player.exp+=this.giveExp;
+        player.gems+=this.giveGems;
         delete hitboxGroups["Enemies"].hitboxes[this.id]
         delete hitboxGroups["Sword"].hitboxes[this.id + "1"]
         delete hitboxGroups["Sword"].hitboxes[this.id + "2"]
