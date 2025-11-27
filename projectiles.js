@@ -17,11 +17,41 @@ function projectile(x, y, r, type, opt) {
                 this.color = "rgb(0, 0, 230)"
             }
         break;
+        case "Mana Bullet":
+            this.size = 7;
+            this.spd = 7;
+            this.lifeTime = 300;
+            this.damage = 10;
+            this.decay = 100;
+            if(this.opt === "enemy") {
+                this.color = "rgb(200, 0, 0)"
+            } else {
+                this.color = "rgb(0, 0, 200)"
+            }
+        break;
+        case "Fireball":
+            this.size = 14;
+            this.spd = 5;
+            this.lifeTime = 200;
+            this.damage = 1;
+            this.decay = 5;
+            this.effects = {
+                "fire": {
+                    "last": 100,
+                }
+            };
+        break;
     }
 }
 projectile.prototype.draw = function() {
     switch(this.type) {
         case "Mana Pellet":
+            ctx.fillStyle = this.color;
+            ctx.beginPath();
+            ctx.ellipse(this.x, this.y, this.size, this.size, 0, 0, Math.PI * 2)
+            ctx.fill();
+        break;
+        case "Mana Bullet":
             ctx.fillStyle = this.color;
             ctx.beginPath();
             ctx.ellipse(this.x, this.y, this.size, this.size, 0, 0, Math.PI * 2)

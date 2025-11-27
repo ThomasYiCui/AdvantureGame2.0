@@ -36,6 +36,7 @@ window.addEventListener("keyup", keysReleased, false);
 var player;
 var enemies;
 var scene = "shop";
+var teams = [];
 var sceneOpt = {
     desc: undefined,
 };
@@ -66,22 +67,22 @@ var weaponStats = {
     },
     "Katana": {
         kb: 1,
-        dmg: 0.5,
+        dmg: 0.3,
         spd: 6,
     },
     "Mace": {
         kb: 8,
-        dmg: 0.9,
+        dmg: 1.5,
         spd: 3,
     },
     "Spear": {
         kb: 2,
-        dmg: 0.3,
+        dmg: 2,
         spd: 5,
     },
     "Great Sword": {
         kb: 6,
-        dmg: 0.6,
+        dmg: 0.4,
         spd: 2,
     },
 }
@@ -392,11 +393,17 @@ function button(x, y, w, h, func, opt) {
     }
 }
 function spawnEnemy() {
-    for(let i = 0; i < 10 - enemyNum["Goblin"]; i++) {
-        enemies.push(new Enemy(-2500 + 500 * Math.random(), -400 + 800 * Math.random(), "Goblin", "G" + i + "frame" + frameCount))
+    for(let i = 0; i < 40 - enemyNum["Goblin"]; i++) {
+        let groups = Object.groupBy(enemies, (enemy) => enemy.team);
+        if(!groups["enemy"] || groups["enemy"].length < 20) {
+            enemies.push(new Enemy(-2500 + 500 * Math.random(), -400 + 800 * Math.random(), "Goblin", "G" + i + "frame" + frameCount, "enemy"))
+        }
+        if(!groups["ally"] || groups["ally"].length < 20) {
+            enemies.push(new Enemy(-1000 - 500 * Math.random(), -400 + 800 * Math.random(), "Goblin", "AG" + i + "frame" + frameCount, "ally"))
+        }
     }
     for(let i = 0; i < 10 - enemyNum["Slime"]; i++) {
-        enemies.push(new Enemy(2500 - 500 * Math.random(), -400 + 800 * Math.random(), "Slime", "S" + i + "frame" + frameCount))
+        //enemies.push(new Enemy(-1000 - 500 * Math.random(), -400 + 800 * Math.random(), "Slime", "S" + i + "frame" + frameCount, "ally"))
     }
 }
 function descWeapon(weaponName, cost, desc) {
@@ -414,5 +421,4 @@ function buyWeapon(weaponName, cost) {
         player.equipped = weaponName;
         player.owned.push(weaponName);
     }
-
 }

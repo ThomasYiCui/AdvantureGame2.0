@@ -103,6 +103,12 @@ props.push(new prop(650, -30, "signpost", {size: 13, txt: "Slimes", xOffset: 2, 
 
 ctx.translate(canvas.width/2, canvas.height/2)
 var update = setInterval(function() {
+    teams = Object.groupBy(enemies, (npc) => npc.team);
+    if(!teams["ally"]) {
+        teams["ally"] = [player]
+    } else {
+        teams["ally"].push(player)
+    }
     switch(scene) {
         case "game":
             spawnEnemy();

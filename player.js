@@ -41,8 +41,11 @@ function Player() {
             }
         }, cooldown: 0, reset: 50},
         "Key2": {keycode: 81, function: function(info) {
-            
-        }},
+            if(info.mana >= 2) {
+                info.mana-=2;
+                projectiles.push(new projectile(info.x - Math.cos(info.r) * info.size, info.y - Math.sin(info.r) * info.size, info.r, "Mana Bullet", {type: "ally", id: frameCount}))
+            }
+        }, cooldown: 0, reset: 40},
         "key3": {keycode: 70, function: function(info) {
             
         }},

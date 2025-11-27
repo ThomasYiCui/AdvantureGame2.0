@@ -1,8 +1,9 @@
-function Enemy(x, y, type, id) {
+function Enemy(x, y, type, id, team) {
     this.x = x;
     this.y = y;
     this.pX = this.x;
     this.pY = this.y;
+    this.team = team;
     this.target = null;
     this.aX = 0;
     this.aY = 0;
@@ -29,16 +30,16 @@ function Enemy(x, y, type, id) {
             this.giveGems = 9;
             this.spd = 1;
             this.strength = 0.5;
-            this.strafing = false;
-            if(Math.random() < 0.5) {
-                this.strafeFactor = -1;
-            } else {
-                this.strafeFactor = 1;
-            }
+            this.strafing = Math.random() > 0.5;
             this.strafe = -50 + 100 * Math.random();
             this.movementType = "slash"
             this.swings = [0, 0, 0, 0, 0];
             this.swing = 0;
+            if(this.team === "enemy") {
+                this.color = "rgb(250, 5, 5)"
+            } else if(this.team === "ally") {
+                this.color = "rgb(5, 5, 250)";
+            }
         break;
         case "Slime":
             this.health = 14;
@@ -55,6 +56,11 @@ function Enemy(x, y, type, id) {
             this.resetHitCD = 20;
             this.movementType = "bounce"
             this.options = {"dmgOnCollide": true}
+            if(this.team === "enemy") {
+                this.color = "rgb(250, 5, 5)"
+            } else if(this.team === "ally") {
+                this.color = "rgb(5, 5, 250)";
+            }
         break;
     }
 }
@@ -64,18 +70,22 @@ Enemy.prototype.draw = function() {
             // health bar
             ctx.fillStyle = "rgb(0, 0, 0)"
             ctx.fillRect(this.x - this.size, this.y + this.size * 1.3, this.size * 2, this.size * 0.35);
-            ctx.fillStyle = "rgb(219, 0, 0)"
+            if(this.team === "enemy") {
+                ctx.fillStyle = "rgb(219, 0, 0)"
+            } else if(this.team === "ally") {
+                ctx.fillStyle = "rgb(40, 219, 13)"
+            }
             ctx.fillRect(this.x - this.size * 0.95, this.y + this.size * 1.35, this.size * 1.9 * this.health/this.maxHealth, this.size * 0.25);
             
             // body
-            ctx.fillStyle = "rgb(245, 5, 5)";
+            ctx.fillStyle = this.color;
             ctx.beginPath();
             ctx.ellipse(this.x, this.y, this.size, this.size, 0, 0, 2 * Math.PI);
             ctx.fill();
             this.index = this.y + this.size;
         break;
         case "Slime":
-            ctx.fillStyle = "rgb(245, 5, 5)";
+            ctx.fillStyle = this.color;
             ctx.beginPath();
             ctx.ellipse(this.x, this.y + this.size * 0.7, this.size, this.size * 1.5, 0, Math.PI, 0);
             ctx.fill();
@@ -83,20 +93,43 @@ Enemy.prototype.draw = function() {
             // health bar
             ctx.fillStyle = "rgb(0, 0, 0)"
             ctx.fillRect(this.x - this.size, this.y + this.size * 1.3, this.size * 2, this.size * 0.35);
-            ctx.fillStyle = "rgb(219, 0, 0)"
+            if(this.team === "enemy") {
+                ctx.fillStyle = "rgb(219, 0, 0)"
+            } else if(this.team === "ally") {
+                ctx.fillStyle = "rgb(40, 219, 13)"
+            }
             ctx.fillRect(this.x - this.size * 0.95, this.y + this.size * 1.35, this.size * 1.9 * this.health/this.maxHealth, this.size * 0.25);
             this.index = this.y + this.size;
         break;
     }
 }
 Enemy.prototype.findTarget = function() {
-    if(dist(player.x, player.y, this.x, this.y) < 1000) {
-        return player;
-    }
     if(this.target) {
         if(dist(this.target.x, this.target.y, this.x, this.y) > 1500) {
-            return null;
+            return undefined;
         }
+    } else {
+        let minDist = 1000;
+        let target = undefined;
+        let hateTeams = [];
+        if(this.team === "ally") {
+            hateTeams = ["enemy"]
+        } else if(this.team === "enemy") {
+            hateTeams = ["ally"]
+        }
+        for(let i = 0; i < hateTeams.length; i++) {
+            let team = teams[hateTeams[i]];
+            if(!team) {
+                continue;
+            }
+            for(let j = 0; j < team.length; j++) {
+                if(dist(team[j].x, team[j].y, this.x, this.y) < minDist) {
+                    target = team[j];
+                    minDist = dist(team[j].x, team[j].y, this.x, this.y);
+                }
+            }
+        }
+        return target;
     }
 }
 Enemy.prototype.update = function() {
@@ -128,6 +161,7 @@ Enemy.prototype.update = function() {
                 }
                 var distance = dist(this.target.x, this.target.y, this.x, this.y);
                 if(distance > this.target.size * 2 + 20 + Math.abs(this.strafe)) {
+                    /**
                     if(this.x < this.target.x) {
                         this.aX+=this.spd
                     }
@@ -140,6 +174,9 @@ Enemy.prototype.update = function() {
                     if(this.y > this.target.y) {
                         this.aY-=this.spd
                     }
+                    */
+                    this.aX-=Math.cos(Math.atan2(this.y - this.target.y, this.x - this.target.x) + this.strafe/50 * Math.PI/8) * this.spd;
+                    this.aY-=Math.sin(Math.atan2(this.y - this.target.y, this.x - this.target.x) + this.strafe/50 * Math.PI/8) * this.spd;
                 } else if(distance < this.target.size * 2 + 15 + Math.abs(this.strafe)) {
                     if(this.x < this.target.x) {
                         this.aX-=this.spd
@@ -184,28 +221,28 @@ Enemy.prototype.update = function() {
                 y: this.y  - Math.sin(this.r) * this.size * 6/3, 
                 s: this.size/3,
                 refer: this,
-                type: "enemy",
+                type: this.team,
             };
             hitboxGroups["Sword"].hitboxes[this.id + "2"] = {
                 x: this.x - Math.cos(this.r) * this.size * 8/3, 
                 y: this.y  - Math.sin(this.r) * this.size * 8/3, 
                 s: this.size/2,
                 refer: this,
-                type: "enemy",
+                type: this.team,
             };
             hitboxGroups["Sword"].hitboxes[this.id + "3"] = {
                 x: this.x - Math.cos(this.r) * this.size * 22/6, 
                 y: this.y  - Math.sin(this.r) * this.size * 22/6, 
                 s: this.size/2,
                 refer: this,
-                type: "enemy",
+                type: this.team,
             };
             hitboxGroups["Sword"].hitboxes[this.id + "4"] = {
                 x: this.x - Math.cos(this.r) * this.size * 28/6, 
                 y: this.y  - Math.sin(this.r) * this.size * 28/6, 
                 s: this.size/2,
                 refer: this,
-                type: "enemy",
+                type: this.team,
             };
             this.equippedIndex = Math.max(this.y - Math.sin(this.r) * (1.5 * this.size) + 15, this.y - Math.sin(this.r) * (6 * this.size) + 15)
             render.push({item: this, index: this.equippedIndex})
@@ -216,7 +253,7 @@ Enemy.prototype.update = function() {
         x: this.x,
         y: this.y,
         s: this.size,
-        type: "enemy",
+        type: this.team,
         refer: this,
         options: this.options
     }
