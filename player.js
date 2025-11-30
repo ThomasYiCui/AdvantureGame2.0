@@ -5,9 +5,11 @@ function Player() {
     this.pY = this.y;
     this.index = 0;
     this.equippedIndex = 0;
+    this.knockBackRes = 1;
     this.aX = 0;
     this.aY = 0;
     this.armor = 1;
+    this.manaArmor = 1;
     this.swings = [0, 0, 0, 0, 0];
     this.swing = 0;
     this.lvl = 1;
@@ -27,6 +29,7 @@ function Player() {
     this.gems = 5000;
     this.displayGems = this.gems;
     this.owned = ["Basic Sword"]
+    this.spells = ["Mana Pellet", "Mana Bullet", "Summon Goblin", "Heal"]
     this.exp = 0;
     //this.exp = 0;
     this.nxtLvlExp = 10;
@@ -34,24 +37,10 @@ function Player() {
     this.r = 0;
     this.equipped = "Basic Sword"
     this.skills = {
-        "key1": {keycode: 69, function: function(info) {
-            if(info.mana >= 1) {
-                info.mana-=1;
-                projectiles.push(new projectile(info.x - Math.cos(info.r) * info.size, info.y - Math.sin(info.r) * info.size, info.r, "Mana Pellet", {type: "ally", id: frameCount}))
-            }
-        }, cooldown: 0, reset: 50},
-        "Key2": {keycode: 81, function: function(info) {
-            if(info.mana >= 2) {
-                info.mana-=2;
-                projectiles.push(new projectile(info.x - Math.cos(info.r) * info.size, info.y - Math.sin(info.r) * info.size, info.r, "Mana Bullet", {type: "ally", id: frameCount}))
-            }
-        }, cooldown: 0, reset: 40},
-        "key3": {keycode: 70, function: function(info) {
-            
-        }},
-        "key4": {keycode: 84, function: function(info) {
-            
-        }},
+        "key1": {keycode: 69, spell: "Mana Pellet", cooldown: 0},
+        "key2": {keycode: 81, spell: "Mana Bullet", cooldown: 0},
+        "key3": {keycode: 70, spell: "Summon Goblin", cooldown: 0},
+        "key4": {keycode: 84, spell: "Heal", cooldown: 0},
     }
     this.upgrades = {};
     this.dashCD = 0;
@@ -127,15 +116,15 @@ Player.prototype.update = function() {
         this.aX+=this.spd;
     }
     if(keys[16] && this.upgrades["Dash"] && this.dashCD <= 0) {
-        this.dashCD = 100;
+        this.dashCD = 50;
     }
     this.stamina = Math.max(Math.min(this.stamina, this.maxStamina), 0);
-    if(this.dashCD >= 80 && this.stamina > 0) {
-        this.stamina-=0.1;
-        this.x-=Math.cos(this.r) * 3 * this.spd
-        this.y-=Math.sin(this.r) * 3 * this.spd
-        this.aX-=Math.cos(this.r) * 2 * this.spd;
-        this.aY-=Math.sin(this.r) * 2 * this.spd
+    if(this.dashCD >= 30 && this.stamina > 0) {
+        this.stamina-=0.05;
+        this.x-=Math.cos(this.r) * 2 * this.spd
+        this.y-=Math.sin(this.r) * 2 * this.spd
+        this.aX-=Math.cos(this.r) * 1 * this.spd;
+        this.aY-=Math.sin(this.r) * 1 * this.spd
     }
     if(this.dashCD > 0) {
         this.dashCD-=1;
@@ -156,9 +145,12 @@ Player.prototype.update = function() {
     }
     for(let i in this.skills) {
         let skill = this.skills[i]
+        if(skill.keycode === 70 && !this.upgrades["Spell Slot F"] || skill.keycode === 84 && !this.upgrades["Spell Slot T"]) {
+            continue;
+        }
         if(keys[skill.keycode] && skill.cooldown <= 0) {
-            skill.function(this)
-            skill.cooldown = skill.reset;
+            spells[skill.spell].func(this)
+            skill.cooldown = spells[skill.spell].reset;
         }
         skill.cooldown-=1;
     }

@@ -25,7 +25,11 @@ hitboxGroups = {
     }),
     "Projectiles": new hitboxGroup({}, function(h1, h2) {
         if(h1.type !== h2.type) {
-            h2.refer.health-=h1.refer.damage;
+            if(h1.refer.dmgType === "mana") {
+                h2.refer.health-=h1.refer.damage * h2.refer.manaArmor;
+            } else {
+                h2.refer.health-=h1.refer.damage;
+            }
             h1.refer.lifeTime-=h1.refer.decay;
         }
     }),
@@ -34,19 +38,19 @@ hitboxGroups = {
             if(h1 !== h2) {
                 let r = Math.atan2(h1.y - h2.y, h1.x - h2.x);
                 let distance = dist(h1.x, h1.y, h2.x, h2.y);
-                h2.refer.aX-=Math.cos(r) * (h1.s + h2.s + 15 - distance) * 0.1;
-                h2.refer.aY-=Math.sin(r) * (h1.s + h2.s + 15 - distance) * 0.1;
-                h1.refer.aX+=Math.cos(r) * (h1.s + h2.s + 15 - distance) * 0.1;
-                h1.refer.aY+=Math.sin(r) * (h1.s + h2.s + 15 - distance) * 0.1;
+                h2.refer.aX-=Math.cos(r) * (h1.s + h2.s + 15 - distance) * 0.1 * h2.refer.knockBackRes;
+                h2.refer.aY-=Math.sin(r) * (h1.s + h2.s + 15 - distance) * 0.1 * h2.refer.knockBackRes;
+                h1.refer.aX+=Math.cos(r) * (h1.s + h2.s + 15 - distance) * 0.1 * h1.refer.knockBackRes;
+                h1.refer.aY+=Math.sin(r) * (h1.s + h2.s + 15 - distance) * 0.1 * h1.refer.knockBackRes;
             }
         } else {
             if(h1 !== h2) {
                 let r = Math.atan2(h1.y - h2.y, h1.x - h2.x);
                 let distance = dist(h1.x, h1.y, h2.x, h2.y);
-                h2.refer.aX-=Math.cos(r) * (h1.s + h2.s + 15 - distance) * 0.1;
-                h2.refer.aY-=Math.sin(r) * (h1.s + h2.s + 15 - distance) * 0.1;
-                h1.refer.aX+=Math.cos(r) * (h1.s + h2.s + 15 - distance) * 0.1;
-                h1.refer.aY+=Math.sin(r) * (h1.s + h2.s + 15 - distance) * 0.1;
+                h2.refer.aX-=Math.cos(r) * (h1.s + h2.s + 15 - distance) * 0.1 * h2.refer.knockBackRes;
+                h2.refer.aY-=Math.sin(r) * (h1.s + h2.s + 15 - distance) * 0.1 * h2.refer.knockBackRes;
+                h1.refer.aX+=Math.cos(r) * (h1.s + h2.s + 15 - distance) * 0.1 * h1.refer.knockBackRes;
+                h1.refer.aY+=Math.sin(r) * (h1.s + h2.s + 15 - distance) * 0.1 * h1.refer.knockBackRes;
             }
             if(h1.options.dmgOnCollide && h1.refer.hitCD <= 0) {
                 h2.refer.health-=h1.refer.dmg * h2.refer.armor;
@@ -60,8 +64,8 @@ hitboxGroups = {
     "Sword": new hitboxGroup({}, function(h1, h2) {
         if(h2.type !== h1.type) {
             let r = Math.atan2(h1.y - h2.y, h1.x - h2.x)
-            h2.refer.aX-=Math.cos(r) * weaponStats[h1.refer.equipped].kb * (1 + h1.refer.swing * 10);
-            h2.refer.aY-=Math.sin(r) * weaponStats[h1.refer.equipped].kb * (1 + h1.refer.swing * 10);
+            h2.refer.aX-=Math.cos(r) * weaponStats[h1.refer.equipped].kb * (1 + h1.refer.swing * 10) * h2.refer.knockBackRes;
+            h2.refer.aY-=Math.sin(r) * weaponStats[h1.refer.equipped].kb * (1 + h1.refer.swing * 10) * h2.refer.knockBackRes;
             h2.refer.health-=(weaponStats[h1.refer.equipped].dmg + h1.refer.swing * 10) * h1.refer.strength * h2.refer.armor;
         }
     })
@@ -207,7 +211,75 @@ var update = setInterval(function() {
                 ctx.translate(player.x, player.y)
                 ctx.translate(-cam.x, -cam.y)
             }, {hoverColor: "rgb(100, 100, 100)", color: "rgb(150, 150, 150)", txtColor: "rgb(0, 0, 0)", txtSize: 15, txt: "Upgrade", args: undefined, yOffset: 5})
+            button(10, canvas.height - 190.5, 70, 25, function() {
+                scene = "spell book"
+                ctx.translate(player.x, player.y)
+                shopCam = {
+                    x: 0, 
+                    y: 0,
+                }
+                ctx.translate(-shopCam.x, -shopCam.y)
+            }, {hoverColor: "rgb(100, 100, 100)", color: "rgb(150, 150, 150)", txtColor: "rgb(0, 0, 0)", txtSize: 12, txt: "Spell Book", args: undefined, yOffset: 5})
             ctx.translate(-player.x, -player.y)
+        break;
+        case "spell book":
+            ctx.translate(shopCam.x, shopCam.y)
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = "rgb(33, 33, 33)";
+            ctx.fillRect(-canvas.width/2, -canvas.height/2, canvas.width * 2, canvas.height * 2)
+            if((keys[87] || keys[38]) && shopCam.y - 5 >= 0) {
+                shopCam.y-=5;
+            } else if((keys[83] || keys[40])) {
+                shopCam.y+=5;
+            }
+            ctx.translate(-shopCam.x, -shopCam.y)
+            for(let i = 0; i < player.spells.length; i++) {
+                button(10, 70 + i * 70, (canvas.width - 30)/2, 60, function(spell) {
+                    sceneOpt = {
+                        name: spell,
+                        cost: spells[spell].cost,
+                        desc: spells[spell].desc,
+                        reset: spells[spell].reset,
+                    }
+                }, {args: player.spells[i], hoverColor: "rgb(100, 100, 100)", color: "rgb(150, 150, 150)", txtColor: "rgb(0, 0, 0)", txtSize: 15, txt: player.spells[i], yOffset: 5})
+            }
+
+            ctx.translate(shopCam.x, shopCam.y)
+            ctx.fillStyle = "rgba(42, 42, 42, 1)"
+            ctx.fillRect(-canvas.width/2, -canvas.height/2, canvas.width, 50);
+            ctx.fillStyle = "rgba(19, 19, 19, 1)"
+            ctx.fillRect(0, -canvas.height/2 + 50, canvas.width, canvas.height - 50);
+            if(sceneOpt.desc) {
+                ctx.fillStyle = "rgba(255, 255, 255, 1)";
+                ctx.font = "15px Arial"
+                ctx.textAlign = "left"
+                wrappedText(sceneOpt.desc, 20, -canvas.height/2 + 80, canvas.width/2, 20)
+                wrappedText("Cooldown: " + sceneOpt.reset, 20, -canvas.height/2 + 140, canvas.width/2, 20)
+                wrappedText("Mana Cost: " + sceneOpt.cost, 20, -canvas.height/2 + 160, canvas.width/2, 20)
+                let buttonHeight = (canvas.width - 90)/8;
+                button(10 + canvas.width/2 - 2, canvas.height - buttonHeight - 10, buttonHeight, buttonHeight, function(spell) {
+                    player.skills["key1"].spell = spell;
+                }, {hoverColor: "rgb(100, 100, 100)", color: "rgb(150, 150, 150)", txtColor: "rgb(0, 0, 0)", txtSize: 15, txt: "E", args: sceneOpt.name, yOffset: 5})
+                button(10 + canvas.width/2 + buttonHeight + 8, canvas.height - buttonHeight - 10, buttonHeight, buttonHeight, function(spell) {
+                    player.skills["key2"].spell = spell;
+                }, {hoverColor: "rgb(100, 100, 100)", color: "rgb(150, 150, 150)", txtColor: "rgb(0, 0, 0)", txtSize: 15, txt: "Q", args: sceneOpt.name, yOffset: 5})
+                button(10 + canvas.width/2 + buttonHeight * 2 + 18, canvas.height - buttonHeight - 10, buttonHeight, buttonHeight, function(spell) {
+                    player.skills["key3"].spell = spell;
+                }, {hoverColor: "rgb(100, 100, 100)", color: "rgb(150, 150, 150)", txtColor: "rgb(0, 0, 0)", txtSize: 15, txt: "F", args: sceneOpt.name, yOffset: 5})
+                button(10 + canvas.width/2 + buttonHeight * 3 + 28, canvas.height - buttonHeight - 10, buttonHeight, buttonHeight, function(spell) {
+                    player.skills["key4"].spell = spell;
+                }, {hoverColor: "rgb(100, 100, 100)", color: "rgb(150, 150, 150)", txtColor: "rgb(0, 0, 0)", txtSize: 15, txt: "T", args: sceneOpt.name, yOffset: 5})
+            }
+            ctx.textAlign = "center"
+            ctx.font = "40px Arial"
+            ctx.fillStyle = "rgba(255, 255, 255, 1)"
+            ctx.fillText("Spell Book", 0, -canvas.height/2 + 35);
+            button(10, 10, 40, 25, function() {
+                scene = "game"
+                ctx.translate(shopCam.x, shopCam.y)
+                ctx.translate(-player.x, -player.y)
+            }, {hoverColor: "rgb(100, 100, 100)", color: "rgb(150, 150, 150)", txtColor: "rgb(0, 0, 0)", txtSize: 15, txt: "Exit", args: undefined, yOffset: 5})
+            ctx.translate(-shopCam.x, -shopCam.y)
         break;
         case "shop":
             ctx.translate(shopCam.x, shopCam.y)

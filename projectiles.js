@@ -11,6 +11,7 @@ function projectile(x, y, r, type, opt) {
             this.lifeTime = 100;
             this.damage = 5;
             this.decay = 100;
+            this.dmgType = "mana";
             if(this.opt === "enemy") {
                 this.color = "rgb(230, 0, 0)"
             } else {
@@ -23,6 +24,7 @@ function projectile(x, y, r, type, opt) {
             this.lifeTime = 300;
             this.damage = 10;
             this.decay = 100;
+            this.dmgType = "mana";
             if(this.opt === "enemy") {
                 this.color = "rgb(200, 0, 0)"
             } else {
@@ -35,6 +37,7 @@ function projectile(x, y, r, type, opt) {
             this.lifeTime = 200;
             this.damage = 1;
             this.decay = 5;
+            this.dmgType = "mana"
             this.effects = {
                 "fire": {
                     "last": 100,

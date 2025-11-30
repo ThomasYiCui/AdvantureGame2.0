@@ -35,7 +35,7 @@ window.addEventListener("keydown", keysPressed, false);
 window.addEventListener("keyup", keysReleased, false);
 var player;
 var enemies;
-var scene = "shop";
+var scene = "spell book";
 var teams = [];
 var sceneOpt = {
     desc: undefined,
@@ -58,6 +58,56 @@ var shopCam = {
 var enemyNum = {
     "Goblin": 0,
     "Slime": 0,
+    "Troll": 0,
+}
+var spells = {
+    "Mana Pellet": {
+        desc: "The basic starter bullet",
+        cost: 1,
+        func: function(info) {
+            if(info.mana >= 1) {
+                info.mana-=1;
+                projectiles.push(new projectile(info.x - Math.cos(info.r) * info.size, info.y - Math.sin(info.r) * info.size, info.r, "Mana Pellet", {type: "ally", id: frameCount}))
+            }
+        },
+        reset: 50,
+    },
+    "Mana Bullet": {
+        desc: "A stronger, faster bullet with piercing cabilities",
+        cost: 2,
+        func: function(info) {
+            if(info.mana >= 2) {
+                info.mana-=2;
+                projectiles.push(new projectile(info.x - Math.cos(info.r) * info.size, info.y - Math.sin(info.r) * info.size, info.r, "Mana Bullet", {type: "ally", id: frameCount}))
+            }
+        },
+        reset: 40,
+    },
+    "Summon Goblin": {
+        desc: "Summon a goblin to fight for you",
+        cost: 5,
+        func: function(info) {
+            if(info.mana >= 5) {
+                info.mana-=5;
+                let r = info.r + Math.random() * Math.PI/4 - Math.PI/8
+                let goblin = new Enemy(info.x - 100 + Math.random() * 200, info.y - 100 + Math.random() * 200, "Goblin", "PSG" + frameCount, "ally");
+                goblin.r = r;
+                enemies.push(goblin)
+            }
+        },
+        reset: 80,
+    },
+    "Heal": {
+        desc: "Heal 5 HP",
+        cost: 5,
+        func: function(info) {
+            if(info.mana >= 5 && info.health + 5 <= info.maxHealth) {
+                info.mana-=5;
+                info.health+=5;
+            }
+        },
+        reset: 50,
+    },
 }
 var weaponStats = {
     "Basic Sword": {
@@ -67,51 +117,73 @@ var weaponStats = {
     },
     "Katana": {
         kb: 1,
-        dmg: 0.3,
+        dmg: 0.25,
         spd: 6,
     },
     "Mace": {
         kb: 8,
+        dmg: 1.75,
+        spd: 3,
+    },
+    "Club": {
+        kb: 12,
+        dmg: 1,
+        spd: 1,
+    },
+    "Spear": {
+        kb: 0.5,
         dmg: 1.5,
         spd: 3,
     },
-    "Spear": {
-        kb: 2,
-        dmg: 2,
-        spd: 5,
-    },
     "Great Sword": {
         kb: 6,
-        dmg: 0.4,
-        spd: 2,
+        dmg: 0.3,
+        spd: 1.5,
     },
 }
 
 var upgrades = {
     // Jack of All
     "Enchance": {func: function() {
-        if(player.sp >= 2 && !player.upgrades["Enchance"]) {
-            player.sp-=2;
-            player.maxHealth*=1.2;
-            player.health*=1.2;
-            player.healthRegen*=1.2;
-            player.maxMana*=1.2;
-            player.mana*=1.2;
-            player.manaRegen*=1.2;
+        if(player.sp >= 6 && !player.upgrades["Enchance"]) {
+            player.sp-=6;
+            player.maxHealth*=1.5;
+            player.health*=1.5;
+            player.healthRegen*=1.5;
+            player.maxMana*=1.5;
+            player.mana*=1.5;
+            player.manaRegen*=1.5;
             player.upgrades["Enchance"] = player.upgrades["Enchance"] + 1 || 1;
         }
-    }, maxLvl: 5, spCost: 2, x: 0, y: -80, colorScheme: "jack", desc: "20% more max + regen health and mana"},
-    
+    }, maxLvl: 5, spCost: 6, x: 0, y: -80, colorScheme: "jack", desc: "50% more max + regen health and mana"},
+    "Clerity": {func: function() {
+        if(player.sp >= 5 && !player.upgrades["Clerity"]) {
+            player.sp-=5;
+            player.maxStamina*=1.4;
+            player.stamina*=1.4;
+            player.staminaRegen*=1.4;
+            player.spd+=0.2;
+            player.upgrades["Clerity"] = player.upgrades["Clerity"] + 1 || 1;
+        }
+    }, maxLvl: 5, spCost: 5, x: -40, y: -130, colorScheme: "jack", connect: "Enchance", desc: "40% more max + regen stamina and 0.2 more speed"},
+    "Sturdy": {func: function() {
+        if(player.sp >= 5 && !player.upgrades["Sturdy"]) {
+            player.sp-=5;
+            player.strength*=1.25;
+            player.armor*=0.75;
+            player.upgrades["Sturdy"] = player.upgrades["Sturdy"] + 1 || 1;
+        }
+    }, maxLvl: 5, spCost: 4, x: 40, y: -130, colorScheme: "jack", connect: "Enchance", desc: "25% damage reduction and melee damage"},
     // Health
     "Vitality": {func: function() {
-        if(player.sp >= 1 && !player.upgrades["Vitality"]) {
-            player.sp-=1;
+        if(player.sp >= 2 && !player.upgrades["Vitality"]) {
+            player.sp-=2;
             player.health*=1.2;
             player.maxHealth*=1.2;
             player.healthRegen*=1.2;
             player.upgrades["Vitality"] = player.upgrades["Vitality"] + 1 || 1;
         }
-    }, maxLvl: 5, spCost: 1, x: 0, y: 40, colorScheme: "health", desc: "20% more max health and regen"},
+    }, maxLvl: 5, spCost: 2, x: 0, y: 40, colorScheme: "health", desc: "20% more max health and regen"},
     "Tank": {func: function() {
         if(player.sp >= 2 && !player.upgrades["Tank"]) {
             player.sp-=2;
@@ -156,17 +228,48 @@ var upgrades = {
             player.upgrades["Dash"] = player.upgrades["Dash"] + 1 || 1;
         }
     }, maxLvl: 2, spCost: 2, x: -80, y: 0, colorScheme: "mobility", desc: "unlocks dashing: [Shift] to use"},
+    "Speed": {func: function() {
+        if(player.sp >= 2 && !player.upgrades["Speed"]) {
+            player.spd+=0.1;
+            player.sp-=2;
+            player.upgrades["Speed"] = player.upgrades["Speed"] + 1 || 1;
+        }
+    }, maxLvl: 2, spCost: 2, x: -130, y: -40, colorScheme: "mobility", connect: "Dash", desc: "Increases Speed by 0.1"},
+    "Stamina": {func: function() {
+        if(player.sp >= 2 && !player.upgrades["Stamina"]) {
+            player.maxStamina*=1.2;
+            player.stamina*=1.2;
+            player.staminaRegen*=1.2;
+            player.sp-=2;
+            player.upgrades["Stamina"] = player.upgrades["Stamina"] + 1 || 1;
+        }
+    }, maxLvl: 2, spCost: 2, x: -130, y: 40, colorScheme: "mobility", connect: "Dash", desc: "20% increase in max stamina and regen"},
+    "Max Stamina": {func: function() {
+        if(player.sp >= 2 && !player.upgrades["Max Stamina"]) {
+            player.maxStamina*=1.4;
+            player.stamina*=1.4;
+            player.sp-=2;
+            player.upgrades["Max Stamina"] = player.upgrades["Max Stamina"] + 1 || 1;
+        }
+    }, maxLvl: 2, spCost: 2, x: -200, y: 40, colorScheme: "mobility", connect: "Stamina", desc: "40% increase in max stamina"},
+    "Stamina Regen": {func: function() {
+        if(player.sp >= 2 && !player.upgrades["Stamina Regen"]) {
+            player.staminaRegen*=1.4;
+            player.sp-=2;
+            player.upgrades["Stamina Regen"] = player.upgrades["Stamina Regen"] + 1 || 1;
+        }
+    }, maxLvl: 2, spCost: 2, x: -200, y: 110, colorScheme: "mobility", connect: "Stamina", desc: "40% increase in stamina regen"},
     
     // Mana
     "Mana": {func: function() {
-        if(player.sp >= 1 && !player.upgrades["Mana"]) {
-            player.sp-=1;
+        if(player.sp >= 2 && !player.upgrades["Mana"]) {
+            player.sp-=2;
             player.mana*=1.2;
             player.maxMana*=1.2;
             player.manaRegen*=1.2;
             player.upgrades["Mana"] = player.upgrades["Mana"] + 1 || 1;
         }
-    }, maxLvl: 5, spCost: 1, x: 80, y: 0, colorScheme: "mana", desc: "20% max mana and mana regen"},
+    }, maxLvl: 5, spCost: 2, x: 80, y: 0, colorScheme: "mana", desc: "20% max mana and mana regen"},
     "Mana Regen": {func: function() {
         if(player.sp >= 2 && !player.upgrades["Mana Regen"]) {
             player.sp-=2;
@@ -175,13 +278,25 @@ var upgrades = {
         }
     }, maxLvl: 5, spCost: 2, x: 130, y: -40, colorScheme: "mana", connect: "Mana", desc: "50% more mana regen"},
     "Mana Pool": {func: function() {
-        if(player.sp >= 2 && !player.upgrades["Mana"]) {
+        if(player.sp >= 2 && !player.upgrades["Mana Pool"]) {
             player.sp-=2;
             player.mana*=1.4;
             player.maxMana*=1.4;
             player.upgrades["Mana Pool"] = player.upgrades["Mana Pool"] + 1 || 1;
         }
     }, maxLvl: 5, spCost: 2, x: 130, y: 40, colorScheme: "mana", connect: "Mana", desc: "40% more max mana"},
+    "Spell Slot F": {func: function() {
+        if(player.sp >= 4 && !player.upgrades["Spell Slot F"]) {
+            player.sp-=4;
+            player.upgrades["Spell Slot F"] = player.upgrades["Spell Slot F"] + 1 || 1;
+        }
+    }, maxLvl: 1, spCost: 4, x: 200, y: 40, colorScheme: "mana", connect: "Mana Pool", desc: "Unlocks another Spell Slot: [F]"},
+    "Spell Slot T": {func: function() {
+        if(player.sp >= 4 && !player.upgrades["Spell Slot T"]) {
+            player.sp-=4;
+            player.upgrades["Spell Slot T"] = player.upgrades["Spell Slot T"] + 1 || 1;
+        }
+    }, maxLvl: 1, spCost: 4, x: 200, y: -40, colorScheme: "mana", connect: "Mana Regen", desc: "Unlocks another Spell Slot: [T]"},
 }
 
 function dist(x1, y1, x2, y2) {
@@ -336,6 +451,18 @@ function drawWeapon(x, y, r, s, type) {
             ctx.ellipse(x - Math.cos(r) * (s * 15/3), y - Math.sin(r) * (s * 15/3), s, s, 0, 0, Math.PI * 2)
             ctx.fill();
         break;
+        case "Club":
+            ctx.fillStyle = "rgb(252, 219, 154)";
+            ctx.beginPath();
+            ctx.ellipse(x - Math.cos(r) * s * 2, y  - Math.sin(r) * s * 2, s/3, s/3, 0, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.lineWidth = s/2;
+            ctx.strokeStyle = "rgb(171, 86, 0)"
+            ctx.beginPath(); 
+            ctx.moveTo(x - Math.cos(r) * (s * 1.5), y - Math.sin(r) * (s * 1.5)); 
+            ctx.lineTo(x - Math.cos(r) * (s * 7.2), y - Math.sin(r) * (s * 7.2)); 
+            ctx.stroke();
+        break;
     }
 }
 function button(x, y, w, h, func, opt) {
@@ -346,7 +473,7 @@ function button(x, y, w, h, func, opt) {
             } else if(opt.swapEquip) {
                 func(opt.weapon, opt.cost)
             } else {
-                func(opt.args);
+                func(opt.args)
             }
         }
         ctx.fillStyle = opt.hoverColor;
@@ -393,17 +520,14 @@ function button(x, y, w, h, func, opt) {
     }
 }
 function spawnEnemy() {
-    for(let i = 0; i < 40 - enemyNum["Goblin"]; i++) {
-        let groups = Object.groupBy(enemies, (enemy) => enemy.team);
-        if(!groups["enemy"] || groups["enemy"].length < 20) {
-            enemies.push(new Enemy(-2500 + 500 * Math.random(), -400 + 800 * Math.random(), "Goblin", "G" + i + "frame" + frameCount, "enemy"))
-        }
-        if(!groups["ally"] || groups["ally"].length < 20) {
-            enemies.push(new Enemy(-1000 - 500 * Math.random(), -400 + 800 * Math.random(), "Goblin", "AG" + i + "frame" + frameCount, "ally"))
-        }
+    for(let i = 0; i < 0 - enemyNum["Goblin"]; i++) {
+        enemies.push(new Enemy(-2500 + 500 * Math.random(), -400 + 800 * Math.random(), "Goblin", "G" + i + "frame" + frameCount, "enemy"))
+    }
+    for(let i = 0; i < 1 - enemyNum["Troll"]; i++) {
+        enemies.push(new Enemy(-2500 + 500 * Math.random(), -400 + 800 * Math.random(), "Troll", "T" + i + "frame" + frameCount, "enemy"))
     }
     for(let i = 0; i < 10 - enemyNum["Slime"]; i++) {
-        //enemies.push(new Enemy(-1000 - 500 * Math.random(), -400 + 800 * Math.random(), "Slime", "S" + i + "frame" + frameCount, "ally"))
+        enemies.push(new Enemy(2500 - 500 * Math.random(), -400 + 800 * Math.random(), "Slime", "S" + i + "frame" + frameCount, "enemy"))
     }
 }
 function descWeapon(weaponName, cost, desc) {
