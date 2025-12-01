@@ -89,6 +89,24 @@ events.push(new Event(-275, -100, 150, 50, function() {
             x: 0,
             y: 0,
         }
+        sceneOpt.shop = "Blacksmith"
+        ctx.translate(player.x, player.y)
+        ctx.translate(-shopCam.x, -shopCam.y)
+    }
+}, {
+    triggers: {
+        type: "playerProximity",
+    }
+}))
+events.push(new Event(100, -100, 150, 50, function() {
+
+    if(keys[32]) {
+        scene = "shop"
+        shopCam = {
+            x: 0,
+            y: 0,
+        }
+        sceneOpt.shop = "Magic Store"
         ctx.translate(player.x, player.y)
         ctx.translate(-shopCam.x, -shopCam.y)
     }
@@ -296,21 +314,32 @@ var update = setInterval(function() {
             ctx.textAlign = "center"
             ctx.font = "40px Arial"
             ctx.fillStyle = "rgba(255, 255, 255, 1)"
-            ctx.fillText("Blacksmith", 0, -canvas.height/2 + 35);
+            ctx.fillText(sceneOpt.shop, 0, -canvas.height/2 + 35);
 
-            button(10, 70, (canvas.width - 30)/2, 60, descWeapon, {hoverColor: "rgb(100, 100, 100)", color: "rgb(150, 150, 150)", txtColor: "rgb(0, 0, 0)", txtSize: 15, txt: "Basic Sword", cost: 0, swapEquip: true, args: undefined, yOffset: 5, desc: "A basic sword"})
-            button(10, 140, (canvas.width - 30)/2, 60, descWeapon, 
-                {hoverColor: "rgb(100, 100, 100)", color: "rgb(150, 150, 150)", txtColor: "rgb(0, 0, 0)", txtSize: 15, txt: "Spear", cost: 2000, swapEquip: true, args: undefined, yOffset: 5, desc: "A long ranged piercing weapon"})
-            button(10, 210, (canvas.width - 30)/2, 60, descWeapon, {hoverColor: "rgb(100, 100, 100)", color: "rgb(150, 150, 150)", txtColor: "rgb(0, 0, 0)", txtSize: 15, txt: "Great Sword", cost: 2000, swapEquip: true, args: undefined, yOffset: 5, desc: "A bulky long but slower sword"})
-            button(10, 280, (canvas.width - 30)/2, 60, descWeapon, {hoverColor: "rgb(100, 100, 100)", color: "rgb(150, 150, 150)", txtColor: "rgb(0, 0, 0)", txtSize: 15, txt: "Katana", cost: 2000, swapEquip: true, args: undefined, yOffset: 5, desc: "A quick fast sword perfect for parrying"})
-            button(10, 350, (canvas.width - 30)/2, 60, descWeapon, {hoverColor: "rgb(100, 100, 100)", color: "rgb(150, 150, 150)", txtColor: "rgb(0, 0, 0)", txtSize: 15, txt: "Mace", cost: 2000, swapEquip: true, args: undefined, yOffset: 5, desc: "A great big heavy mace for staggering"})
+            if(sceneOpt.shop === "Blacksmith") {
+                button(10, 70, (canvas.width - 30)/2, 60, descWeapon, {hoverColor: "rgb(100, 100, 100)", color: "rgb(150, 150, 150)", txtColor: "rgb(0, 0, 0)", txtSize: 15, txt: "Basic Sword", cost: 0, swapEquip: true, args: undefined, yOffset: 5, desc: "A basic sword"})
+                button(10, 140, (canvas.width - 30)/2, 60, descWeapon, 
+                    {hoverColor: "rgb(100, 100, 100)", color: "rgb(150, 150, 150)", txtColor: "rgb(0, 0, 0)", txtSize: 15, txt: "Spear", cost: 2000, swapEquip: true, args: undefined, yOffset: 5, desc: "A long ranged piercing weapon"})
+                button(10, 210, (canvas.width - 30)/2, 60, descWeapon, {hoverColor: "rgb(100, 100, 100)", color: "rgb(150, 150, 150)", txtColor: "rgb(0, 0, 0)", txtSize: 15, txt: "Great Sword", cost: 2000, swapEquip: true, args: undefined, yOffset: 5, desc: "A bulky long but slower sword"})
+                button(10, 280, (canvas.width - 30)/2, 60, descWeapon, {hoverColor: "rgb(100, 100, 100)", color: "rgb(150, 150, 150)", txtColor: "rgb(0, 0, 0)", txtSize: 15, txt: "Katana", cost: 2000, swapEquip: true, args: undefined, yOffset: 5, desc: "A quick fast sword perfect for parrying"})
+                button(10, 350, (canvas.width - 30)/2, 60, descWeapon, {hoverColor: "rgb(100, 100, 100)", color: "rgb(150, 150, 150)", txtColor: "rgb(0, 0, 0)", txtSize: 15, txt: "Mace", cost: 2000, swapEquip: true, args: undefined, yOffset: 5, desc: "A great big heavy mace for staggering"})
+            } else if(sceneOpt.shop === "Magic Store") {
+                button(10, 70, (canvas.width - 30)/2, 60, descWeapon, {hoverColor: "rgb(100, 100, 100)", color: "rgb(150, 150, 150)", txtColor: "rgb(0, 0, 0)", txtSize: 15, txt: "Mana Bullet", cost: 400, swapSpell: true, args: undefined, yOffset: 5, desc: spells["Mana Bullet"].desc})
+                button(10, 140, (canvas.width - 30)/2, 60, descWeapon, {hoverColor: "rgb(100, 100, 100)", color: "rgb(150, 150, 150)", txtColor: "rgb(0, 0, 0)", txtSize: 15, txt: "Summon Slime", cost: 750, swapSpell: true, args: undefined, yOffset: 5, desc: spells["Summon Slime"].desc})
+                button(10, 210, (canvas.width - 30)/2, 60, descWeapon, {hoverColor: "rgb(100, 100, 100)", color: "rgb(150, 150, 150)", txtColor: "rgb(0, 0, 0)", txtSize: 15, txt: "Summon Goblin", cost: 1500, swapSpell: true, args: undefined, yOffset: 5, desc: spells["Summon Goblin"].desc})
+                button(10, 280, (canvas.width - 30)/2, 60, descWeapon, {hoverColor: "rgb(100, 100, 100)", color: "rgb(150, 150, 150)", txtColor: "rgb(0, 0, 0)", txtSize: 15, txt: "Heal", cost: 2000, swapSpell: true, args: undefined, yOffset: 5, desc: spells["Heal"].desc})
+            }
 
             if(sceneOpt.desc) {
                 ctx.fillStyle = "rgba(255, 255, 255, 1)";
                 ctx.font = "15px Arial"
                 ctx.textAlign = "left"
                 wrappedText(sceneOpt.desc, 20, canvas.height/2 - 100, canvas.width/2, 20)
-                button(10 + canvas.width/2, canvas.height - 70, (canvas.width - 30)/2, 60, buyWeapon, {hoverColor: "rgb(100, 100, 100)", color: "rgb(150, 150, 150)", txtColor: "rgb(0, 0, 0)", txtSize: 15, txt: "Buy", weapon: sceneOpt.name, cost: sceneOpt.cost, swapEquip: true, args: undefined, yOffset: 5})
+                if(sceneOpt.shop === "Blacksmith") {
+                    button(10 + canvas.width/2, canvas.height - 70, (canvas.width - 30)/2, 60, buyWeapon, {hoverColor: "rgb(100, 100, 100)", color: "rgb(150, 150, 150)", txtColor: "rgb(0, 0, 0)", txtSize: 15, txt: "Buy", weapon: sceneOpt.name, cost: sceneOpt.cost, swapEquip: true, args: undefined, yOffset: 5})
+                } else if(sceneOpt.shop === "Magic Store") {
+                    button(10 + canvas.width/2, canvas.height - 70, (canvas.width - 30)/2, 60, swapSpell, {hoverColor: "rgb(100, 100, 100)", color: "rgb(150, 150, 150)", txtColor: "rgb(0, 0, 0)", txtSize: 15, txt: "Buy", weapon: sceneOpt.name, cost: sceneOpt.cost, swapEquip: true, args: undefined, yOffset: 5})
+                }
                 drawWeapon(0, 100, Math.PI * 0.75, 50, sceneOpt.name)
             }
 

@@ -1,4 +1,4 @@
-function Enemy(x, y, type, id, team) {
+function Enemy(x, y, type, id, team, opt) {
     this.x = x;
     this.y = y;
     this.pX = this.x;
@@ -17,6 +17,11 @@ function Enemy(x, y, type, id, team) {
     this.options = {};
     if(!enemyNum[this.type]) {
         enemyNum[this.type] = 0;
+    }
+    if(opt) {
+        if(opt.spawnTime) {
+            this.spawnTime = opt.spawnTime;
+        }
     }
     switch(this.type) {
         case "Goblin":
@@ -53,7 +58,7 @@ function Enemy(x, y, type, id, team) {
                 "halfHealth": function(self) {
                     for(let i = 0; i < 5; i++) {
                         let r = Math.random() * Math.PI * 2
-                        let enemy = new Enemy(self.x + Math.cos(r) * (800 + Math.random() * 200), self.y + (Math.sin(r) * 800 + Math.random() * 200), "Goblin", "BSG" + i + frame + self.id, "enemy");
+                        let enemy = new Enemy(self.x + Math.cos(r) * (800 + Math.random() * 200), self.y + (Math.sin(r) * 800 + Math.random() * 200), "Goblin", "BSG" + i + frameCount + self.id, "enemy");
                         enemy.r = self.r + Math.random() * Math.PI/4 - Math.PI/8;
                         enemies.push(enemy)
                     }
@@ -103,6 +108,9 @@ function Enemy(x, y, type, id, team) {
     }
 }
 Enemy.prototype.draw = function() {
+    if(this.spawnTime && this.spawnTime > 0) {
+        return;
+    }
     let r = this.r;
     switch(this.type) {
         case "Goblin":
@@ -197,7 +205,7 @@ Enemy.prototype.draw = function() {
     }
 }
 Enemy.prototype.findTarget = function() {
-    let minDist = 1000;
+    let minDist = 500;
     let target = undefined;
     if(this.target && this.target.health > 0) {
         target = this.target;
@@ -224,6 +232,11 @@ Enemy.prototype.findTarget = function() {
     return target;
 }
 Enemy.prototype.update = function() {
+    enemyNum[this.type]+=1;
+    if(this.spawnTime && this.spawnTime > 0) {
+        this.spawnTime-=1;
+        return;
+    }
     this.pX = this.x;
     this.pY = this.y;
     this.x+=this.aX;
@@ -415,7 +428,6 @@ Enemy.prototype.update = function() {
             render.push({item: this, index: this.equippedIndex})
         break;
     }
-    enemyNum[this.type]+=1;
     hitboxGroups["Enemies"].hitboxes[this.id] = {
         x: this.x,
         y: this.y,

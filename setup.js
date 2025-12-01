@@ -61,6 +61,14 @@ var enemyNum = {
     "Troll": 0,
 }
 var spells = {
+    "None": {
+        desc: "No ability",
+        cost: 0,
+        func: function(info) {
+            return "None"
+        },
+        reset: 1,
+    },
     "Mana Pellet": {
         desc: "The basic starter bullet",
         cost: 1,
@@ -83,19 +91,33 @@ var spells = {
         },
         reset: 40,
     },
-    "Summon Goblin": {
-        desc: "Summon a goblin to fight for you",
+    "Summon Slime": {
+        desc: "Summon a slime to fight for you",
         cost: 5,
         func: function(info) {
             if(info.mana >= 5) {
                 info.mana-=5;
+                let r = info.r + Math.random() * Math.PI/4 - Math.PI/8
+                let slime = new Enemy(info.x - 100 + Math.random() * 200, info.y - 100 + Math.random() * 200, "Slime", "PSS" + frameCount, "ally");
+                slime.r = r;
+                enemies.push(slime)
+            }
+        },
+        reset: 40,
+    },
+    "Summon Goblin": {
+        desc: "Summon a goblin to fight for you",
+        cost: 10,
+        func: function(info) {
+            if(info.mana >= 10) {
+                info.mana-=10;
                 let r = info.r + Math.random() * Math.PI/4 - Math.PI/8
                 let goblin = new Enemy(info.x - 100 + Math.random() * 200, info.y - 100 + Math.random() * 200, "Goblin", "PSG" + frameCount, "ally");
                 goblin.r = r;
                 enemies.push(goblin)
             }
         },
-        reset: 80,
+        reset: 40,
     },
     "Heal": {
         desc: "Heal 5 HP",
@@ -469,6 +491,7 @@ function button(x, y, w, h, func, opt) {
     if(!opt.upgradeButton && mouseX > x && mouseY > y && mouseX < x + w && mouseY < y + h || opt.upgradeButton && dist(mouseX, mouseY, x - cam.x, y - cam.y) < w) {
         if(clicked) {
             if(opt.desc) {
+                console.log("wsg")
                 func(opt.txt, opt.cost, opt.desc)
             } else if(opt.swapEquip) {
                 func(opt.weapon, opt.cost)
@@ -486,14 +509,14 @@ function button(x, y, w, h, func, opt) {
     } else {
         ctx.fillStyle = opt.color;
     }
-    if(opt.swapEquip) {
+    if(opt.swapEquip || opt.swapSpell) {
          if(player.equipped === opt.txt) {
             opt.txt = opt.txt + " [Equipped]";
         } else if(player.equipped === opt.weapon) {
             opt.txt = opt.weapon + " [Equipped]";
-        } else if(player.owned.includes(opt.txt)) {
+        } else if(player.owned.includes(opt.txt) || player.spells.includes(opt.txt)) {
             opt.txt = opt.txt + " [Owned]";
-        } else if(player.owned.includes(opt.weapon)) {
+        } else if(player.owned.includes(opt.weapon) || player.spells.includes(opt.weapon)) {
             opt.txt = opt.weapon + " [Owned]"
         } else {
             if(opt.weapon) {
@@ -520,14 +543,17 @@ function button(x, y, w, h, func, opt) {
     }
 }
 function spawnEnemy() {
-    for(let i = 0; i < 0 - enemyNum["Goblin"]; i++) {
-        enemies.push(new Enemy(-2500 + 500 * Math.random(), -400 + 800 * Math.random(), "Goblin", "G" + i + "frame" + frameCount, "enemy"))
+    for(let i = 0; i < 10 - enemyNum["Goblin"]; i++) {
+        enemies.push(new Enemy(-2500 + 500 * Math.random(), -400 + 800 * Math.random(), "Goblin", "G" + i + "frame" + frameCount, "enemy", {spawnTime: 1000}))
     }
     for(let i = 0; i < 1 - enemyNum["Troll"]; i++) {
-        enemies.push(new Enemy(-2500 + 500 * Math.random(), -400 + 800 * Math.random(), "Troll", "T" + i + "frame" + frameCount, "enemy"))
+        enemies.push(new Enemy(-4000 + 500 * Math.random(), -400 + 800 * Math.random(), "Troll", "T" + i + "frame" + frameCount, "enemy", {spawnTime: 10000}))
+    }
+    for(let i = 0; i < 1 - enemyNum["King Slime"]; i++) {
+        enemies.push(new Enemy(4000 - 500 * Math.random(), -400 + 800 * Math.random(), "Troll", "T" + i + "frame" + frameCount, "enemy", {spawnTime: 10000}))
     }
     for(let i = 0; i < 10 - enemyNum["Slime"]; i++) {
-        enemies.push(new Enemy(2500 - 500 * Math.random(), -400 + 800 * Math.random(), "Slime", "S" + i + "frame" + frameCount, "enemy"))
+        enemies.push(new Enemy(2500 - 500 * Math.random(), -400 + 800 * Math.random(), "Slime", "S" + i + "frame" + frameCount, "enemy", {spawnTime: 1000}))
     }
 }
 function descWeapon(weaponName, cost, desc) {
@@ -535,6 +561,13 @@ function descWeapon(weaponName, cost, desc) {
         name: weaponName,
         cost: cost,
         desc: desc,
+        shop: sceneOpt.shop,
+    }
+}
+function swapSpell(spellName, cost) {
+    if(!player.spells.includes(spellName) && player.gems >= cost) {
+        player.gems-=cost;
+        player.spells.push(spellName);
     }
 }
 function buyWeapon(weaponName, cost) {

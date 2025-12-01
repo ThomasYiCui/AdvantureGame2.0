@@ -29,7 +29,7 @@ function Player() {
     this.gems = 5000;
     this.displayGems = this.gems;
     this.owned = ["Basic Sword"]
-    this.spells = ["Mana Pellet", "Mana Bullet", "Summon Goblin", "Heal"]
+    this.spells = ["Mana Pellet"]
     this.exp = 0;
     //this.exp = 0;
     this.nxtLvlExp = 10;
@@ -38,9 +38,9 @@ function Player() {
     this.equipped = "Basic Sword"
     this.skills = {
         "key1": {keycode: 69, spell: "Mana Pellet", cooldown: 0},
-        "key2": {keycode: 81, spell: "Mana Bullet", cooldown: 0},
-        "key3": {keycode: 70, spell: "Summon Goblin", cooldown: 0},
-        "key4": {keycode: 84, spell: "Heal", cooldown: 0},
+        "key2": {keycode: 81, spell: "None", cooldown: 0},
+        "key3": {keycode: 70, spell: "None", cooldown: 0},
+        "key4": {keycode: 84, spell: "None", cooldown: 0},
     }
     this.upgrades = {};
     this.dashCD = 0;
