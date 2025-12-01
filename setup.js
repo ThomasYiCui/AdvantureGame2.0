@@ -35,7 +35,7 @@ window.addEventListener("keydown", keysPressed, false);
 window.addEventListener("keyup", keysReleased, false);
 var player;
 var enemies;
-var scene = "spell book";
+var scene = "game";
 var teams = [];
 var sceneOpt = {
     desc: undefined,
@@ -578,4 +578,5 @@ function buyWeapon(weaponName, cost) {
         player.equipped = weaponName;
         player.owned.push(weaponName);
     }
+
 }
