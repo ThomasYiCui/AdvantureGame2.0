@@ -7,7 +7,7 @@ var mouseY = 0;
 var dragged = false;
 var clicked = false
 var keys = [];
-var showHitbox = true;
+var showHitbox = false;
 function keysPressed(e) {
   keys[e.keyCode] = true;
   e.preventDefault();
@@ -580,3 +580,4 @@ function buyWeapon(weaponName, cost) {
     }
 
 }
+
